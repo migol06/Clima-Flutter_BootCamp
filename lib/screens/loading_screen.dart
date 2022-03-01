@@ -28,29 +28,31 @@ class _LoadingScreenState extends State<LoadingScreen> {
     ClimaLocation climaLocation = ClimaLocation();
     await climaLocation.getLocation();
 
+    latitude = climaLocation.lat;
+    longitude = climaLocation.lon;
+
     debugPrint(climaLocation.lat.toString());
     debugPrint(climaLocation.lon.toString());
 
-    // longitude = climaLocation.longitude;
-    // latitude = climaLocation.latitude;
-
-    // getWeather();
+    getWeather();
   }
 
-  // void getWeather() async {
-  //   http.Response response = await http.get(Uri.parse(
-  //       'http://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$key'));
+  void getWeather() async {
+    http.Response response = await http.get(Uri.parse(
+        'http://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$key&units=metric'));
 
-  //   if (response.statusCode == 200) {
-  //     String name = jsonDecode(response.body)['name'];
-  //     int condition = jsonDecode(response.body)['weather'][0]['id'];
-  //     double temperature = jsonDecode(response.body)['main']['temp'];
+    if (response.statusCode == 200) {
+      String name = jsonDecode(response.body)['name'];
+      int condition = jsonDecode(response.body)['weather'][0]['id'];
+      double temperature = jsonDecode(response.body)['main']['temp'];
 
-  //     debugPrint(name);
-  //     debugPrint(condition.toString());
-  //     debugPrint(temperature.toString());
-  //   }
-  // }
+      debugPrint(response.body);
+
+      debugPrint(name);
+      debugPrint(condition.toString());
+      debugPrint(temperature.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
