@@ -1,9 +1,8 @@
-import 'dart:convert';
-
+import 'package:clima_app/screens/location_screen.dart';
 import 'package:clima_app/services/location.dart';
+import 'package:clima_app/services/networking.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 const key = 'e3da0dbf133b9560f178270040d27620';
 
@@ -15,55 +14,41 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  double? longitude;
-  double? latitude;
-
   @override
   void initState() {
     super.initState();
-    getLocation();
+    getLocationData();
   }
 
-  void getLocation() async {
+  void getLocationData() async {
     ClimaLocation climaLocation = ClimaLocation();
     await climaLocation.getLocation();
 
-    latitude = climaLocation.lat;
-    longitude = climaLocation.lon;
+    NetworkHelper helper = NetworkHelper(
+        url:
+            'https://api.openweathermap.org/data/2.5/weather?lat=${climaLocation.lat}&lon=${climaLocation.lon}&appid=$key&units=metric');
 
+    var weatherData = await helper.getData();
+
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => LocationScreen(
+                  locationWeather: weatherData,
+                )));
+
+    debugPrint(weatherData['main']['temp'].toString());
     debugPrint(climaLocation.lat.toString());
     debugPrint(climaLocation.lon.toString());
-
-    getWeather();
-  }
-
-  void getWeather() async {
-    http.Response response = await http.get(Uri.parse(
-        'http://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$key&units=metric'));
-
-    if (response.statusCode == 200) {
-      String name = jsonDecode(response.body)['name'];
-      int condition = jsonDecode(response.body)['weather'][0]['id'];
-      double temperature = jsonDecode(response.body)['main']['temp'];
-
-      debugPrint(response.body);
-
-      debugPrint(name);
-      debugPrint(condition.toString());
-      debugPrint(temperature.toString());
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            //Get the current location
-            getLocation();
-          },
-          child: const Text('Get Location'),
+        child: SpinKitRotatingCircle(
+          color: Colors.white,
+          size: 50.0,
         ),
       ),
     );
